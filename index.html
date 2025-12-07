@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoruba-English Translator</title>
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-color: #f4f4f9;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --muted-text: #666666;
+            --border-color: #dddddd;
+            
+            /* Brand Colors */
+            --primary-color: #007bff;       
+            --primary-hover: #0056b3;
+            --btn-text-color: #ffffff;      
+            
+            --secondary-bg: #f8f9fa;        
+            --icon-color: #333333; /* Dark icon for light mode */
+            
+            /* WhatsApp Green */
+            --wa-color: #25D366;
+            --wa-hover: #128C7E;
+        }
+
+        /* --- DARK MODE OVERRIDES --- */
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --muted-text: #aaaaaa;
+            --border-color: #333333;
+            
+            --primary-color: #bb86fc;       
+            --primary-hover: #9965f4;
+            --btn-text-color: #121212;      
+            
+            --secondary-bg: #2c2c2c;
+            --icon-color: #e0e0e0; /* Light icon for dark mode */       
+        }
+
+        /* --- BASE STYLES --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+            padding: 20px 0;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 90%;
+            max-width: 480px;
+            position: relative;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Header & Description */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin: 0;
+            font-weight: 800;
+        }
+
+        .app-description {
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--muted-text);
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        /* Theme Toggle Icon */
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px;
+            border-radius: 50%; /* Circle shape */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-bg);
+            border-color: var(--primary-color);
+        }
+
+        /* SVG Styling for Theme Icons */
+        .theme-icon {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: none; /* Hide both by default */
+        }
+
+        /* Logic to show correct icon based on body class */
+        body.dark-mode .theme-icon-sun {
+            display: block;
+        }
+
+        body:not(.dark-mode) .theme-icon-moon {
+            display: block;
+        }
+
+        /* Language Controls */
+        .lang-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background: var(--secondary-bg);
+            padding: 10px 15px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color); 
+        }
+
+        .lang-label {
+            font-weight: 700;
+            font-size: 1rem;
+            width: 40%;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .swap-btn {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s, background 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        .swap-btn:hover {
+            transform: rotate(180deg) scale(1.05);
+            background: var(--primary-hover);
+        }
+
+        .swap-icon {
+            width: 22px;
+            height: 22px;
+            fill: var(--btn-text-color); 
+            display: block;
+        }
+
+        /* Inputs */
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 14px;
+            font-size: 1rem;
+            resize: none; 
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .translate-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: var(--btn-text-color);
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.1s, box-shadow 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+        }
+
+        .translate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .translate-btn:disabled {
+            background-color: var(--border-color);
+            color: var(--muted-text);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--muted-text);
+            min-height: 22px;
+            font-weight: 500;
+        }
+
+        /* --- NEW SECTIONS STYLING --- */
+        .divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 2.5rem 0 2rem 0;
+            opacity: 0.6;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted-text);
+            margin-bottom: 1.2rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Portfolio Link */
+        .portfolio-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            transition: background 0.2s, border-color 0.2s, transform 0.1s;
+        }
+
+        .portfolio-link:hover {
+            background-color: var(--bg-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Grad Cap SVG Icon */
+        .portfolio-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary-color);
+        }
+
+        /* Footer / WhatsApp */
+        .footer {
+            text-align: center;
+            margin-top: 2.5rem;
+        }
+
+        .footer p {
+            font-size: 0.95rem;
+            color: var(--muted-text);
+            margin-bottom: 1.2rem;
+            line-height: 1.6;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--wa-color);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-btn:hover {
+            background-color: var(--wa-hover);
+            transform: translateY(-2px);
+        }
+        
+        .whatsapp-icon {
+             fill: currentColor;
+        }
+
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.8rem;
+                width: 88%; 
+                margin: 10px auto;
+            }
+            
+            textarea {
+                font-size: 16px; /* Prevents iOS zoom */
+            }
+            
+            h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Yoruba Translator</h1>
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                 <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        </button>
+    </div>
+
+    <p class="app-description">
+        A simple tool for instant translations between English and Yoruba, perfect for quick learning and basic communication tasks.
+    </p>
+
+    <div class="lang-controls">
+        <span class="lang-label" id="sourceLabel">English</span>
+        
+        <button class="swap-btn" id="swapBtn" title="Swap Languages">
+            <svg class="swap-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+            </svg>
+        </button>
+
+        <span class="lang-label" id="targetLabel">Yoruba</span>
+    </div>
+
+    <textarea id="inputText" rows="5" placeholder="Type text here..."></textarea>
+
+    <button class="translate-btn" id="translateBtn">Translate</button>
+
+    <div id="status"></div>
+
+    <textarea id="outputText" rows="5" readonly placeholder="Translation..."></textarea>
+
+    <div class="divider"></div>
+
+    <div class="portfolio-section">
+        <div class="section-title">Other Projects</div>
+        <a href="https://edupdf-one.vercel.app/" target="_blank" class="portfolio-link">
+            <svg class="portfolio-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+            </svg>
+            <span>Visit <strong>EduPDF</strong></span>
+        </a>
+    </div>
+
+    <div class="footer">
+        <p>Do you have any suggestions for academic purposes or want to create a simple website?</p>
+        <a href="https://wa.me/2349042427548" target="_blank" class="whatsapp-btn">
+            <svg class="whatsapp-icon" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            Chat on WhatsApp
+        </a>
+    </div>
+</div>
+
+<script>
+    // Elements
+    const inputText = document.getElementById('inputText');
+    const outputText = document.getElementById('outputText');
+    const translateBtn = document.getElementById('translateBtn');
+    const statusDiv = document.getElementById('status');
+    const swapBtn = document.getElementById('swapBtn');
+    const sourceLabel = document.getElementById('sourceLabel');
+    const targetLabel = document.getElementById('targetLabel');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // State
+    let sourceLang = 'en';
+    let targetLang = 'yo';
+
+    // 1. Theme Toggle Logic (Updated to handle icons instead of text)
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        
+        // Save preference
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+        } else {
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // 2. Language Swap Logic
+    swapBtn.addEventListener('click', () => {
+        const tempLang = sourceLang;
+        sourceLang = targetLang;
+        targetLang = tempLang;
+
+        const tempLabel = sourceLabel.textContent;
+        sourceLabel.textContent = targetLabel.textContent;
+        targetLabel.textContent = tempLabel;
+
+        const tempText = inputText.value;
+        inputText.value = outputText.value;
+        outputText.value = tempText;
+    });
+
+    // 3. Translation Logic
+    translateBtn.addEventListener('click', async () => {
+        const text = inputText.value.trim();
+        if (!text) return;
+
+        statusDiv.textContent = "Translating...";
+        translateBtn.disabled = true;
+        
+        try {
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if(data.responseStatus === 200) {
+                outputText.value = data.responseData.translatedText;
+                statusDiv.textContent = "Done!";
+            } else {
+                statusDiv.textContent = "Limit/Error: " + (data.responseDetails || "Unknown error");
+            }
+
+        } catch (error) {
+            console.error(error);
+            statusDiv.textContent = "Check your internet connection.";
+        } finally {
+            translateBtn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>

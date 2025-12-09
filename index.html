@@ -186,7 +186,7 @@
             font-size: 1rem;
             resize: none; 
             box-sizing: border-box;
-            margin-bottom: 1rem;
+            margin-bottom: 0; /* Changed from 1rem to 0 for wrapper */
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
             font-family: inherit;
@@ -195,6 +195,46 @@
         textarea:focus {
             border-color: var(--primary-color);
         }
+
+        /* --- NEW SPEECH BUTTON STYLES --- */
+        .textarea-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .speak-btn {
+            position: absolute;
+            top: 24px; 
+            right: 14px;
+            background: transparent;
+            border: none;
+            color: var(--muted-text);
+            padding: 5px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .speak-btn:hover {
+            color: var(--primary-color);
+            background-color: var(--secondary-bg);
+        }
+
+        .speak-icon {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        /* --- END NEW SPEECH BUTTON STYLES --- */
+
 
         .translate-btn {
             width: 100%;
@@ -366,14 +406,32 @@
 
         <span class="lang-label" id="targetLabel">Yoruba</span>
     </div>
-
-    <textarea id="inputText" rows="5" placeholder="Type text here..."></textarea>
+    
+    <div class="textarea-wrapper">
+        <textarea id="inputText" rows="5" placeholder="Type text here..."></textarea>
+        <button class="speak-btn" id="speakInputBtn" title="Read Input Text">
+            <svg class="speak-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L6 9H2v6h4l5 4z"/>
+                <path d="M15.54 8.46a7 7 0 0 1 0 7.08"/>
+                <path d="M19.07 4.93a12 12 0 0 1 0 14.14"/>
+            </svg>
+        </button>
+    </div>
 
     <button class="translate-btn" id="translateBtn">Translate</button>
 
     <div id="status"></div>
 
-    <textarea id="outputText" rows="5" readonly placeholder="Translation..."></textarea>
+    <div class="textarea-wrapper">
+        <textarea id="outputText" rows="5" readonly placeholder="Translation..."></textarea>
+        <button class="speak-btn" id="speakOutputBtn" title="Read Translation">
+            <svg class="speak-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L6 9H2v6h4l5 4z"/>
+                <path d="M15.54 8.46a7 7 0 0 1 0 7.08"/>
+                <path d="M19.07 4.93a12 12 0 0 1 0 14.14"/>
+            </svg>
+        </button>
+    </div>
 
     <div class="divider"></div>
 
@@ -409,12 +467,15 @@
     const sourceLabel = document.getElementById('sourceLabel');
     const targetLabel = document.getElementById('targetLabel');
     const themeToggle = document.getElementById('themeToggle');
+    // New Elements for Speech
+    const speakInputBtn = document.getElementById('speakInputBtn');
+    const speakOutputBtn = document.getElementById('speakOutputBtn');
 
     // State
     let sourceLang = 'en';
     let targetLang = 'yo';
 
-    // 1. Theme Toggle Logic (Updated to handle icons instead of text)
+    // 1. Theme Toggle Logic
     themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         
@@ -455,6 +516,7 @@
         translateBtn.disabled = true;
         
         try {
+            // Note: 'en' for English, 'yo' for Yoruba
             const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
             
             const response = await fetch(url);
@@ -472,6 +534,38 @@
             statusDiv.textContent = "Check your internet connection.";
         } finally {
             translateBtn.disabled = false;
+        }
+    });
+
+    // 4. Speech Synthesis Logic (NEW)
+    function speakText(text, lang) {
+        if (!('speechSynthesis' in window)) {
+            alert("Your browser does not support speech synthesis.");
+            return;
+        }
+
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        // Note: The correct language code for Yoruba is 'yo'. The browser will use the best available voice.
+        utterance.lang = lang; 
+        window.speechSynthesis.speak(utterance);
+    }
+    
+    // Event listeners for new speak buttons (NEW)
+    speakInputBtn.addEventListener('click', () => {
+        const text = inputText.value.trim();
+        if (text) {
+            speakText(text, sourceLang); 
+        }
+    });
+
+    speakOutputBtn.addEventListener('click', () => {
+        const text = outputText.value.trim();
+        if (text) {
+            speakText(text, targetLang); 
         }
     });
 </script>
